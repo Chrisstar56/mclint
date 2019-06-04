@@ -13,7 +13,8 @@ const logger = winston.createLogger({
         myFormat,
         winston.format.colorize({ all: true, colors: {warn: 'red'}})
       ),
-    })
+      silent: true
+    })//*/
   ],
   
 });

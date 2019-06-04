@@ -2,50 +2,70 @@ var fs = require('fs');
 var CommandParser = require('./command_parser');
 var logger = require('./logs');
 var path = require('path');
+const util = require('util');
+const parseFilePromise = util.promisify(parseFile);
 
-class ParseFile {
-  
-  constructor (file) {
-    this.file = file
-    this.loadFile(file);
-  }
-  
-  loadFile (file) {
-    var contents = fs.readFileSync(file, 'utf8');
-    // and normalise line endings
-    var str = contents.trim().replace(/\r\n/g, "\n");
-    this.lines = str.split("\n");
-  }
-  
-  parse() {
-    var errors = [];
-    for(let i = 0; i < this.lines.length; i++){
-      let line = this.lines[i];
-      line = line.trim();
-      if(line.startsWith("#"))continue;
-      try {
-        logger.debug("Checking Line " + (i + 1));
-         var parser = new CommandParser(line);
-         parser.parse();
-      }catch(e){
-        errors.push("Error in line " + (i + 1) + ": " + e.message + " File: " + this.file);
-      }
+function parseFile(file, callback){
+  fs.readFile(file, ' utf8', (err, contents) => {
+    if(err){
+      callback(err, null);
+      return;
     }
-    logger.verbose("File parsed: " + this.file);
-    if(errors.length === 0){
-      logger.verbose("No Errors!")
-    }else{
-      for(let er of errors){
-        logger.error(er);
+    try {
+      var str = contents.trim().replace(/\r\n/g, "\n");
+      var lines = str.split("\n");
+      
+      var errors = [];
+      for(let i = 0; i < lines.length; i++){
+        let line = lines[i];
+        line = line.trim();
+        if(line.startsWith("#"))continue;
+        try {
+          logger.debug("Checking Line " + (i + 1));
+           var parser = new CommandParser(line);
+           parser.parse();
+        }catch(e){
+          errors.push("Error in line " + (i + 1) + ": " + e.message + " File: " + file);
+        }
       }
+      logger.verbose("File parsed: " + file);
+      if(errors.length === 0){
+        logger.verbose("No Errors!")
+      }else{
+        for(let er of errors){
+          logger.error(er);
+        }
+      }
+      callback(null, errors);
+    } catch (e) {
+      callback(e, null);
     }
+  });
+  
+}
+
+function parseCommand(cmd){
+  cmd = cmd.trim();
+  var error;
+  if(cmd.startsWith("#"))return;
+  try {
+     var parser = new CommandParser(cmd);
+     parser.parse();
+  }catch(e){
+    error = (e.message);
   }
+  logger.verbose("Command parsed: " + cmd);
+  if(!error){
+    logger.verbose("No Errors!")
+  }else{
+    logger.error(error);
+  }
+  return error;
 }
 
 // Loop through all the files in the temp directory
 
-
-function parseDirectory(directory){
+function parseDirectory(directory, callback){
   var directory = path.normalize(directory);
   var walk = function(dir, done, filter) {
     var results = [];
@@ -73,18 +93,28 @@ function parseDirectory(directory){
   };
   walk(directory, function(err, results) {
     if (err) throw err;
-    //logger.info(results);
     logger.info("Start checking files...");
+    var errors = [];
+    var promises = [];
     for(let i = 0; i < results.length; i++){
       let file = results[i];
       logger.info("Checking file " + file);
-      let parser = new ParseFile(file);
-      parser.parse();
+      promises.push(parseFilePromise(file));
     }
+    Promise.all(promises)
+    .then(data => {
+    callback(null, data.filter(el => { return !(!el || el.length === 0)}));
+    }).catch(er => {
+      callback(er, null);
+    });
+      /*var file_errors = parseFile(file);
+      if(file_errors && file_errors.length !== 0){
+        errors.push({file: file, errors: file_errors});
+      }
+    callback(errors);*/
   });
 }
 
-parseDirectory("./test/Tinkery/");
-//parseDirectory("C:/Users/bboet/AppData/Roaming/.minecraft/saves/TestWorld114/datapacks/terminal");
-//new ParseFile("C:/Users/bboet/AppData/Roaming/.minecraft/saves/TestWorld114/datapacks/terminal/data/terminal/functions/test/run.mcfunction").parse();
-//new ParseFile("C:/Users/bboet/Desktop/Programmieren/NodeJS/mclint/test/TCC/data/tcc/functions/charms/timbering/stripped_jungle_log/loop.mcfunction").parse();
+exports.parseDirectory = parseDirectory;
+exports.parseFile = parseFile;
+exports.parseCommand = parseCommand;
