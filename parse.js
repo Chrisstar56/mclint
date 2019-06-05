@@ -6,7 +6,7 @@ const util = require('util');
 const parseFilePromise = util.promisify(parseFile);
 
 function parseFile(file, callback){
-  fs.readFile(file, ' utf8', (err, contents) => {
+  fs.readFile(file, 'utf8', (err, contents) => {
     if(err){
       callback(err, null);
       return;
