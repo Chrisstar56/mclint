@@ -36,7 +36,7 @@ function parseFile(file, callback){
           logger.error(er);
         }
       }
-      callback(null, errors);
+      callback(null, {file: file, errors});
     } catch (e) {
       callback(e, null);
     }
@@ -103,7 +103,7 @@ function parseDirectory(directory, callback){
     }
     Promise.all(promises)
     .then(data => {
-    callback(null, data.filter(el => { return !(!el || el.length === 0)}));
+    callback(null, data);
     }).catch(er => {
       callback(er, null);
     });
