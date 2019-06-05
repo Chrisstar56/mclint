@@ -1,0 +1,43 @@
+{
+  "name": "mclint",
+  "version": "1.0.1",
+  "description": "Syntax Checker for .mcfunction files (Minecraft)",
+  "main": "parse.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chrisstar56/mclint.git"
+  },
+  "author": "Chrisstar56",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chrisstar56/mclint/issues"
+  },
+  "homepage": "https://github.com/Chrisstar56/mclint#readme",
+  "dependencies": {
+    "winston": "^3.2.1"
+  },
+  "files": [
+    "/node-modules",
+    "/resources",
+    "biterator.js",
+    "command_parser.js",
+    "filters.js",
+    "logs.js",
+    "nbt.js",
+    "package.json",
+    "parse.js",
+    "parsers.js",
+    "primitives.js",
+    "resources.js",
+    "selector.js",
+    "test.js",
+    "tree.js",
+    "utils.js"
+  ]
+}
