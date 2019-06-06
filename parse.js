@@ -19,13 +19,17 @@ function parseFile(file, callback){
       for(let i = 0; i < lines.length; i++){
         let line = lines[i];
         line = line.trim();
+        if(line.startsWith("#[IGNORE]")){
+          i++;
+          continue;
+        }
         if(line.startsWith("#"))continue;
         try {
           logger.debug("Checking Line " + (i + 1));
            var parser = new CommandParser(line);
            parser.parse();
         }catch(e){
-          errors.push("Error in line " + (i + 1) + ": " + e.message + " File: " + file);
+          errors.push("Error in line " + (i + 1) + ": " + e.message);
         }
       }
       logger.verbose("File parsed: " + file);

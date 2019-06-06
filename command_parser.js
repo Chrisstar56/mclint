@@ -270,6 +270,6 @@ CommandParser.prototype.parseSingle = function(arg, key){
 
 module.exports = CommandParser;
 /*
-var cmd = 'scoreboard players operation @s tcc.old_xp = tcc.current_xp';
+var cmd = 'execute at @s store result score #tinkery t_dum2 run data get entity @s Inventory[{Slot:100b}].tag.Tinkery.itemdur';
 var pr = new CommandParser(cmd);
 pr.parse();//*/

@@ -58,6 +58,9 @@ class Selector {
       if(str.length == 2){
         return;
       }
+      if(str.charAt(2) !== '['){
+        throw new Error("Invalid selector, opening bracket missing: " + str);
+      }
       //Get end position
       var l = str.length;
       var pos = 2;

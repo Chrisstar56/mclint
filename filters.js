@@ -45,15 +45,17 @@ parsers["range_double"] = function(value, properties){
   if(split.length === 1){
     res.only = parsers["double"](value, properties);
   }else if(split.length === 2){
-    res.min = parsers["double"](split[0], properties);
     if(split[1].startsWith(".")){
       throw new Error("Invalid Range");
     }
-    res.max = parsers["double"](split[1], properties);
-    if(res.max < res.min){
-      if(!(properties && properties.minBiggerThanMax)){
-        throw new Error("Invalid Range: Min cannot be bigger than max");
-      }
+    if(split[0]){
+      res.min = parsers["double"](split[0], properties);
+    }
+    if(split[1]){
+      res.max = parsers["double"](split[1], properties);
+    }
+    if(!(properties && properties.minBiggerThanMax) && res.min > res.max){
+      throw new Error("Invalid Range: Min cannot be bigger than max");
     }
   }else{
     throw new Error("Invalid Range");
@@ -66,11 +68,18 @@ parsers["range_integer"] = function(value, properties){
   if(split.length === 1){
     res.only = parsers["integer"](value, properties);
   }else if(split.length === 2){
-    res.min = parsers["integer"](split[0], properties);
-    res.max = parsers["integer"](split[1], properties);
-    if(!(properties && properties.minBiggerThanMax)){
-        throw new Error("Invalid Range: Min cannot be bigger than max");
-      }
+    if(split[1].startsWith(".")){
+      throw new Error("Invalid Range");
+    }
+    if(split[0]){
+      res.min = parsers["integer"](split[0], properties);
+    }
+    if(split[1]){
+      res.max = parsers["integer"](split[1], properties);
+    }
+    if(!(properties && properties.minBiggerThanMax) && res.min > res.max){
+      throw new Error("Invalid Range: Min cannot be bigger than max");
+    }
   }else{
     throw new Error("Invalid Range");
   }

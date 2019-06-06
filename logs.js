@@ -8,7 +8,7 @@ const myFormat = printf(({ level, message}) => {
 const logger = winston.createLogger({
   transports: [
     new winston.transports.Console({
-      level: 'warn',
+      level: 'debug',
       format: combine(
         myFormat,
         winston.format.colorize({ all: true, colors: {warn: 'red'}})

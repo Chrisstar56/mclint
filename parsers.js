@@ -1,5 +1,6 @@
 var primitives = require('./primitives');
 var Selector = require('./selector');
+var filters = require('./filters');
 var resources = require('./resources');
 var NBTParser = require('./nbt');
 var logger = require('./logs');
@@ -99,6 +100,9 @@ parsers["minecraft:item_stack"] = function(properties){
   var item = this.iter.next();
   var ind = item.indexOf("{")
   if(ind > 0){
+    if(item.indexOf('}', ind) < 0){
+      throw new Error("No terminating bracket in item nbt tag: " + item);
+    }
     item = item.substring(0, (ind));
   }
   if(!resources.isValid("minecraft:item", item)){
@@ -107,7 +111,18 @@ parsers["minecraft:item_stack"] = function(properties){
 }
 //TODO: ITEM TYPE (+ TAGS / ALIASES #wool)
 parsers["minecraft:item_predicate"] = function(properties){
-  this.iter.next();
+  var peek = this.iter.peek();
+  if(peek.startsWith("#")){
+    var ind = peek.indexOf("{")
+    if(ind > 0){
+      if(peek.indexOf('}', ind) < 0){
+        throw new Error("No terminating bracket in item nbt tag: " + item);
+      }
+    }
+    this.iter.next();
+  }else{
+    this.useParserSimple("minecraft:item_stack");
+  }
 }
 
 
@@ -151,17 +166,21 @@ parsers["minecraft:nbt_compound_tag"] = function(properties){
   new NBTParser(nbt).parseNBT();
 }
 
-//TODO: ITEM TYPE (+ TAGS)
+
 parsers["minecraft:objective"] = function(properties){
-  this.iter.next();
+  this.useParserSimple("brigadier:string", {type: 'word'});
 }
 //TODO: ITEM TYPE (+ TAGS)
 parsers["minecraft:objective_criteria"] = function(properties){
   this.iter.next();
 }
-//TODO: ITEM TYPE (+ TAGS)
+
 parsers["minecraft:operation"] = function(properties){
-  this.iter.next();
+  var regex = /^(?:[\%\*\+\-\/]?=|><?|<)$/;
+  var op = this.iter.next();
+  if(!regex.test(op)){
+    throw new Error("Not a operator: " + op);
+  }
 }
 
 
@@ -207,7 +226,7 @@ parsers["minecraft:time"] = function(properties){
 
 //TODO: INT RANGE
 parsers["minecraft:int_range"] = function(properties){
-  this.iter.next();
+  filters['range_integer'](this.iter.next(), {minBiggerThanMax: false});
 }
 
 parsers["minecraft:item_slot"] = function(properties){
