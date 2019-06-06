@@ -40,7 +40,7 @@ function parseFile(file, callback){
           logger.error(er);
         }
       }
-      callback(null, {file: file, errors});
+      callback(null, {file: file, errors: errors});
     } catch (e) {
       callback(e, null);
     }
